@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body style="margin:0">
+<title>Vista do Vale · Bloco C — Telhado, paredes e estrutura</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600&display=swap">
+<style>
+/* Layout: estação de trabalho BIM — barra de ferramentas no topo, árvore de modelos à esquerda, viewport central, propriedades à direita */
+:root{
+  --bg:#12161d; --panel:#181d26; --panel-2:#212835; --line:#2c3443; --fg:#e4e8ef; --muted:#97a1b2;
+  --accent:#f07a30; --accent-soft:#f07a3026; --navy:#9db7e0;
+  --vp-top:#232b39; --vp-bot:#0c0f14; color-scheme:dark;
+  --ax-x:#d2463c; --ax-y:#3a9b4a; --ax-z:#3567c9;
+  --font-ui:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-cond:"IBM Plex Sans Condensed", "Arial Narrow", "IBM Plex Sans", sans-serif;
+  --font-mono:"IBM Plex Mono", ui-monospace, Consolas, monospace;
+  --side:300px; --props:340px;
+}
+html,body{height:100%}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-ui);font-size:13px;overflow:hidden}
+*{box-sizing:border-box}
+button,input,select{font:inherit;color:inherit}
+.app{height:100%;display:grid;grid-template-rows:auto 1fr auto;grid-template-columns:var(--side) 1fr var(--props);grid-template-areas:"top top top" "side vp props" "foot foot foot"}
+header.top{grid-area:top;display:flex;align-items:center;gap:12px;padding-block:8px;padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px));background:var(--panel);border-bottom:1px solid var(--line);min-width:0}
+.brand{display:flex;flex-direction:column;line-height:1.15;min-width:0;flex:0 1 auto}
+.brand b{font-family:var(--font-cond);font-weight:600;font-size:15px;letter-spacing:.02em;white-space:nowrap}
+.brand b i{font-style:normal;color:var(--accent)}
+.brand .vw{color:var(--muted);font-weight:500;font-size:inherit;display:inline}
+.brand > span{color:var(--muted);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tools{display:flex;gap:4px;align-items:center;margin-left:auto;min-width:0;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+.tools::-webkit-scrollbar{display:none}
+.sep{width:1px;height:22px;background:var(--line);margin:0 4px;flex:none}
+.tb{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 10px;border:1px solid transparent;border-radius:6px;background:none;cursor:pointer;white-space:nowrap;flex:none}
+.tb:hover{background:var(--panel-2)}
+.tb:focus-visible,.icon-btn:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.tb.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.tb svg{width:16px;height:16px;flex:none}
+.tb .lbl{font-size:12px}
+.only-narrow{display:none!important}
+.sheet-bar{position:sticky;top:0;z-index:2;background:var(--panel);align-items:center;justify-content:space-between;gap:8px;padding:6px 8px 4px 14px;border-bottom:1px solid var(--line)}
+.sheet-bar .grab{width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto}
+
+aside.side,aside.props{background:var(--panel);overflow:auto;min-width:0}
+aside.side{grid-area:side;border-right:1px solid var(--line)}
+aside.props{grid-area:props;border-left:1px solid var(--line)}
+.sec{border-bottom:1px solid var(--line)}
+.sec-h{display:flex;align-items:center;gap:8px;padding:10px 14px 6px;font-family:var(--font-cond);font-weight:600;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.sec-h .act{margin-left:auto;display:flex;gap:2px}
+.sec-b{padding:0 8px 10px}
+
+.model{border-radius:8px;padding:6px 6px 8px;display:grid;grid-template-columns:auto 1fr auto;gap:4px 8px;align-items:center}
+.model + .model{border-top:1px dashed var(--line);border-radius:0}
+.model .sw{width:10px;height:28px;border-radius:3px}
+.model .nm{min-width:0}
+.model .nm b{display:block;font-weight:600;font-size:13px}
+.model .nm small{display:block;color:var(--muted);font-size:10.5px;font-family:var(--font-mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.model .ctr{display:flex;gap:2px}
+.model .op{grid-column:2 / 4;display:flex;align-items:center;gap:8px}
+.model .op input{flex:1;min-width:0;accent-color:var(--accent)}
+.model .op output{font-family:var(--font-mono);font-size:11px;color:var(--muted);width:34px;text-align:right}
+.model.off .nm,.model.off .op{opacity:.45}
+.model .status{grid-column:2 / 4;font-size:11px;color:var(--muted);font-family:var(--font-mono)}
+.model .bar{grid-column:2 / 4;height:3px;background:var(--panel-2);border-radius:2px;overflow:hidden}
+.model .bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s}
+.model details{grid-column:1 / 4}
+.model summary{cursor:pointer;color:var(--muted);font-size:11.5px;padding:2px 0 2px 18px;list-style:none}
+.model summary::before{content:"▸ ";}
+.model details[open] summary::before{content:"▾ ";}
+.chk{display:flex;align-items:center;gap:8px;padding:3px 6px;border-radius:5px;cursor:pointer;min-width:0}
+.chk:hover{background:var(--panel-2)}
+.chk input{accent-color:var(--accent);margin:0;flex:none}
+.chk .t{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chk .t em{font-style:normal;color:var(--muted);font-family:var(--font-mono);font-size:10.5px;margin-left:4px}
+.chk .n{font-family:var(--font-mono);font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.cats{padding:2px 0 0 12px}
+
+.icon-btn{width:26px;height:26px;display:inline-grid;place-items:center;border:0;border-radius:5px;background:none;cursor:pointer;color:var(--muted)}
+.icon-btn:hover{background:var(--panel-2);color:var(--fg)}
+.icon-btn svg{width:15px;height:15px}
+.icon-btn.on{color:var(--accent)}
+
+.clip-row{display:grid;grid-template-columns:18px 1fr;gap:8px;align-items:center;padding:6px 6px}
+.clip-row .ax{font-family:var(--font-mono);font-weight:500;font-size:12px}
+.dual{position:relative;height:22px}
+.dual input{position:absolute;inset:0;width:100%;margin:0;background:none;pointer-events:none;-webkit-appearance:none;appearance:none;height:22px}
+.dual input::-webkit-slider-thumb{pointer-events:auto;-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--panel);border:2px solid var(--axc);cursor:ew-resize}
+.dual input::-moz-range-thumb{pointer-events:auto;width:12px;height:12px;border-radius:50%;background:var(--panel);border:2px solid var(--axc);cursor:ew-resize}
+.dual .track{position:absolute;left:7px;right:7px;top:10px;height:3px;background:var(--panel-2);border-radius:2px}
+.dual .fill{position:absolute;top:10px;height:3px;background:var(--axc);border-radius:2px}
+.clip-vals{grid-column:2;display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums;margin-top:-2px}
+.clip-on{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 6px 8px}
+.switch{display:flex;align-items:center;gap:8px;cursor:pointer}
+.switch input{accent-color:var(--accent)}
+.btn{height:28px;padding:0 10px;border:1px solid var(--line);border-radius:6px;background:var(--panel);cursor:pointer;font-size:12px}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn:disabled{opacity:.5;cursor:default;border-color:var(--line);color:inherit}
+.btn-row{display:flex;gap:6px;flex-wrap:wrap;padding:2px 6px}
+
+main.vp{grid-area:vp;position:relative;overflow:hidden;background:linear-gradient(180deg,var(--vp-top),var(--vp-bot));min-width:0}
+main.vp canvas{display:block;width:100%;height:100%;touch-action:none}
+.hud{position:absolute;left:12px;bottom:12px;font-family:var(--font-mono);font-size:11px;color:var(--muted);pointer-events:none;display:flex;gap:14px;flex-wrap:wrap}
+.hint{position:absolute;right:12px;bottom:12px;font-size:11px;color:var(--muted);pointer-events:none;text-align:right;line-height:1.5}
+.hint kbd{font-family:var(--font-mono);font-size:10px;border:1px solid var(--line);border-radius:3px;padding:0 4px;background:var(--panel)}
+.drop{position:absolute;inset:12px;border:2px dashed var(--accent);border-radius:12px;display:grid;place-items:center;background:var(--accent-soft);font-weight:600;color:var(--accent);pointer-events:none}
+.loading{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:12px;display:flex;gap:8px;align-items:center;box-shadow:0 4px 16px #0002;max-width:calc(100% - 24px)}
+.loading span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.spin{width:12px;height:12px;border-radius:50%;border:2px solid var(--line);border-top-color:var(--accent);animation:sp 0.8s linear infinite;flex:none}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation-duration:3s}}
+.viewcube{position:absolute;top:12px;right:12px;display:grid;grid-template-columns:repeat(2,auto);gap:4px}
+.viewcube .btn{background:var(--panel);height:26px;padding:0 8px;font-size:11px}
+
+/* propriedades */
+.p-empty{padding:28px 18px;color:var(--muted);line-height:1.55}
+.p-empty b{color:var(--fg);font-weight:600}
+.p-head{padding:14px 14px 10px;border-bottom:1px solid var(--line);display:grid;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:11px;padding:2px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent);width:max-content;max-width:100%}
+.p-head h2{margin:0;font-size:16px;font-weight:600;line-height:1.25;text-wrap:balance;word-break:break-word}
+.p-head .sub{color:var(--muted);font-size:12px}
+.p-head .acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.qgrid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border-bottom:1px solid var(--line)}
+.q{background:var(--panel);padding:10px 14px}
+.q small{display:block;font-family:var(--font-cond);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.q b{display:block;font-family:var(--font-mono);font-weight:500;font-size:15px;font-variant-numeric:tabular-nums;margin-top:2px}
+.q b u{text-decoration:none;color:var(--muted);font-size:11px;margin-left:3px}
+.q.wide{grid-column:1 / 3}
+.q.hl{background:var(--accent-soft)}
+.cl-row{display:grid;grid-template-columns:70px 1fr;align-items:center;gap:8px;padding:3px 6px}
+.cl-row select{width:100%;min-width:0}
+.kv tr[data-i]{cursor:pointer}
+.kv tr[data-i]:hover td{background:var(--panel-2)}
+.q.hl b{color:var(--accent)}
+.q i.sm,.sm{display:block;font-style:normal;font-size:10.5px;color:var(--muted);font-family:var(--font-mono);margin-top:2px}
+select.btn{appearance:auto;background:var(--panel-2);color:var(--fg)}
+.kv tr[data-k]{cursor:pointer}
+.kv tr[data-k]:hover td{background:var(--panel-2)}
+.pset{border-bottom:1px solid var(--line)}
+.pset summary{cursor:pointer;padding:9px 14px;font-weight:600;font-size:12px;display:flex;gap:8px;align-items:center;list-style:none}
+.pset summary::-webkit-details-marker{display:none}
+.pset summary::before{content:"▸";color:var(--muted);font-size:10px}
+.pset[open] summary::before{content:"▾"}
+.pset summary .k{margin-left:auto;font-family:var(--font-mono);font-weight:400;font-size:10.5px;color:var(--muted)}
+.kv{width:100%;border-collapse:collapse;table-layout:fixed;margin-bottom:6px}
+.kv td{padding:4px 14px;vertical-align:top;border-top:1px solid var(--panel-2);word-break:break-word}
+.kv td:first-child{color:var(--muted);width:44%}
+.kv td:last-child{font-family:var(--font-mono);font-size:12px;font-variant-numeric:tabular-nums}
+.note{padding:8px 14px 14px;color:var(--muted);font-size:11px;line-height:1.5}
+
+footer.foot{grid-area:foot;display:flex;gap:16px;align-items:center;padding-block:4px;padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px));border-top:1px solid var(--line);background:var(--panel);font-family:var(--font-mono);font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden}
+footer.foot .r{margin-left:auto;overflow:hidden;text-overflow:ellipsis}
+.nojs{position:fixed;inset:0;z-index:99;background:var(--bg);color:var(--fg);padding:32px max(20px,env(safe-area-inset-left,0px));font-size:16px;line-height:1.5}
+.nojs b{font-size:19px;display:block;margin-bottom:8px}
+.nojs .lk{word-break:break-all;font-family:var(--font-mono);font-size:14px}
+.nojs a{color:var(--accent)}
+.fatal{position:fixed;left:12px;right:12px;top:calc(60px + env(safe-area-inset-top,0px));z-index:50;background:#b3261e;color:#fff;border-radius:8px;padding:10px 12px;display:flex;gap:10px;align-items:center;font-size:13px;box-shadow:0 6px 20px #0004}
+.fatal span{flex:1;min-width:0;word-break:break-word}
+.fatal .btn{background:#fff2;color:#fff;border-color:#fff6}
+.toast{position:absolute;left:50%;bottom:44px;transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:6px 12px;border-radius:6px;font-size:12px;pointer-events:none;opacity:0;transition:opacity .2s}
+.toast.show{opacity:1}
+
+@media (max-width:1100px){:root{--side:260px;--props:300px}.tb .lbl{display:none}}
+@media (max-width:860px){
+  .app{grid-template-columns:1fr;grid-template-areas:"top" "vp" "foot"}
+  .only-narrow{display:inline-flex!important}
+  .sheet-bar.only-narrow{display:flex!important}
+  aside.side,aside.props{position:fixed;z-index:20;box-shadow:0 10px 40px #0005;transition:transform .22s ease}
+  aside.side{top:calc(49px + env(safe-area-inset-top,0px));bottom:calc(26px + env(safe-area-inset-bottom,0px));left:0;width:min(340px,88vw);transform:translateX(-105%);padding-left:env(safe-area-inset-left,0px)}
+  aside.props{left:0;right:0;bottom:0;height:min(58%,520px);border-left:0;border-top:1px solid var(--line);border-radius:14px 14px 0 0;transform:translateY(105%);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+  .p-head{padding-top:4px}
+  .viewcube{top:8px;right:8px}
+  .viewcube .btn{height:30px;padding:0 10px}
+  .model .op input{height:26px}
+  .chk{padding:7px 6px}
+  .tb{height:38px;padding:0 9px}
+  footer.foot{font-size:10px;gap:10px}
+  footer.foot .r{display:none}
+  @media (prefers-reduced-motion:reduce){aside.side,aside.props{transition:none}}
+  .app.show-side aside.side,.app.show-props aside.props{transform:none}
+  .hint{display:none}
+  .brand > span,.brand .vw{display:none}
+}
+</style>
+
+<script type="application/json" id="viewer-config">{"project": "Vista do Vale · Bloco C — Telhado, paredes e estrutura", "models": [{"file": "models/VISTA_DO_VALE_BLOCO_C_-_TLH_PAR_EST_QR-R00.ukm.b64.txt", "label": "Telhado · paredes · estrutura"}]}</script>
+<noscript><div class="nojs"><b>O visualizador 3D não pode rodar nesta pré-visualização.</b><p>No iPhone, os apps Arquivos, WhatsApp e Mail mostram o HTML sem executar o 3D. Abra o link do modelo no Safari.</p><p>No computador, abra o arquivo no Chrome, Edge ou Safari.</p></div></noscript>
+<div class="fatal" id="fatal" hidden><span></span><button class="btn" id="fatalClose">Fechar</button></div>
+<div class="app" id="app">
+  <header class="top">
+    <button class="tb only-narrow" id="btnSide" title="Modelos" aria-label="Mostrar modelos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    <div class="brand"><b>uni<i>-</i>k <span class="vw">Viewer IFC</span></b><span id="projName">Vista do Vale · Bloco C — Telhado, paredes e estrutura</span></div>
+    <div class="tools" role="toolbar" aria-label="Ferramentas">
+      <button class="tb" id="btnOpen" title="Abrir arquivos IFC (.ifc ou .ifc.gz)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19V5h6l2 2h8v12z"/><path d="M12 11v6M9 14h6"/></svg><span class="lbl">Abrir IFC</span></button>
+      <span class="sep"></span>
+      <button class="tb" id="btnFit" title="Enquadrar tudo (F)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><span class="lbl">Enquadrar</span></button>
+      <button class="tb" id="btnClip" title="Caixa de corte (C)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5" stroke-dasharray="2 2"/></svg><span class="lbl">Caixa de corte</span></button>
+      <button class="tb" id="btnColor" title="Colorir por disciplina"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="9" r="4"/><circle cx="16" cy="9" r="4"/><circle cx="12" cy="15" r="4"/></svg><span class="lbl">Cor por disciplina</span></button>
+      <button class="tb" id="btnEdges" title="Projeção ortográfica"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16"/><path d="M4 12h16M12 4v16"/></svg><span class="lbl">Ortográfica</span></button>
+      <span class="sep"></span>
+      <button class="tb" id="btnHide" title="Ocultar seleção (H)" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><path d="M4 20L20 4"/></svg><span class="lbl">Ocultar</span></button>
+      <button class="tb" id="btnIso" title="Isolar seleção (I)" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="8" y="8" width="8" height="8"/><path d="M3 3h4M3 3v4M21 3h-4M21 3v4M3 21h4M3 21v-4M21 21h-4M21 21v-4"/></svg><span class="lbl">Isolar</span></button>
+      <button class="tb" id="btnMulti" title="Seleção múltipla para somar áreas (ou Ctrl/Shift+clique)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="8" height="8"/><rect x="13" y="13" width="8" height="8"/><path d="M17 3v6M14 6h6"/></svg><span class="lbl">Somar áreas</span></button>
+      <button class="tb" id="btnClash" title="Verificar interferências entre modelos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="11" height="11" rx="1"/><circle cx="15" cy="10" r="6"/><path d="M13 9l-2 3h3l-2 3" stroke-width="1.6"/></svg><span class="lbl">Interferências</span></button>
+      <button class="tb" id="btnShowAll" title="Mostrar tudo (Shift+H)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><circle cx="12" cy="12" r="2.5"/></svg><span class="lbl">Mostrar tudo</span></button>
+      <span class="sep only-narrow"></span>
+      <button class="tb only-narrow" id="btnProps" title="Propriedades" aria-label="Mostrar propriedades"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg></button>
+    </div>
+    <input type="file" id="fileIn" multiple hidden>
+  </header>
+
+  <aside class="side" id="side">
+    <div class="sheet-bar only-narrow"><b style="font-family:var(--font-cond);font-size:13px">Modelos e filtros</b><button class="icon-btn" id="closeSide" aria-label="Fechar painel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <section class="sec">
+      <div class="sec-h">Modelos <span class="act"><button class="icon-btn" id="allOn" title="Mostrar todos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12l5 5 9-10"/></svg></button><button class="icon-btn" id="allOff" title="Ocultar todos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button></span></div>
+      <div class="sec-b" id="modelList"></div>
+    </section>
+    <section class="sec" id="clipSec">
+      <div class="sec-h">Caixa de corte</div>
+      <div class="sec-b">
+        <div class="clip-on"><label class="switch"><input type="checkbox" id="clipToggle"> Ativar corte</label><span class="chip" style="background:var(--panel-2);color:var(--muted)">arraste as alças no 3D</span></div>
+        <div id="clipRows"></div>
+        <div class="btn-row"><button class="btn" id="clipSel" disabled>Ajustar à seleção</button><button class="btn" id="clipReset">Redefinir</button></div>
+      </div>
+    </section>
+    <section class="sec">
+      <div class="sec-h">Pavimentos <span class="act"><button class="icon-btn" id="stOn" title="Mostrar todos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12l5 5 9-10"/></svg></button><button class="icon-btn" id="stOff" title="Ocultar todos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button></span></div>
+      <div class="sec-b" id="storeyList"></div>
+    </section>
+  </aside>
+
+  <main class="vp" id="vp">
+    <div class="viewcube">
+      <button class="btn" data-view="top">Topo</button><button class="btn" data-view="iso">Iso</button>
+      <button class="btn" data-view="front">Frente</button><button class="btn" data-view="side">Lateral</button>
+    </div>
+    <div class="loading" id="loading"><div class="spin"></div><span id="loadingTxt">Abrindo o visualizador…</span></div>
+    <div class="drop" id="drop" hidden>Solte os arquivos IFC para carregar</div>
+    <div class="hud" id="hud"></div>
+    <div class="hint"><kbd>clique</kbd> seleciona · <kbd>duplo clique</kbd> centraliza · <kbd>F</kbd> enquadrar · <kbd>H</kbd> ocultar · <kbd>I</kbd> isolar · <kbd>Esc</kbd> limpar</div>
+    <div class="toast" id="toast"></div>
+  </main>
+
+  <aside class="props" id="props"><div class="sheet-bar only-narrow"><span class="grab"></span><button class="icon-btn" id="closeProps" aria-label="Fechar propriedades"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div><div class="p-empty" id="pEmpty"><b>Nenhum elemento selecionado.</b><br>Clique em um objeto no modelo para ver classe IFC, nome, tipo, pavimento, área, volume e os conjuntos de propriedades (Psets).</div><div id="pBody" hidden></div></aside>
+
+  <footer class="foot"><span id="fStats">0 elementos</span><span id="fTris">0 triângulos</span><span class="r" id="fCoord">IFC: X leste · Y norte · Z cota</span></footer>
+</div>
+
+<script>
+(function(){
+  function show(m){ var b=document.getElementById('fatal'); if(!b) return; b.querySelector('span').textContent=m; b.hidden=false; }
+  window.addEventListener('error', function(e){ if(!window.__appStarted) show('Erro ao iniciar: '+(e.message||'desconhecido')); });
+  setTimeout(function(){
+    if(window.__appStarted) return;
+    var gl=false; try{ gl=!!document.createElement('canvas').getContext('webgl2'); }catch(e){}
+    var t=document.getElementById('loadingTxt'); if(t) t.textContent='O visualizador não iniciou';
+    show('O visualizador não iniciou neste app. No iPhone, abra o link do modelo no Safari (a pré-visualização de arquivos do iOS pode bloquear o 3D). WebGL2: '+(gl?'sim':'não')+' · '+navigator.userAgent);
+  }, 20000);
+})();
+</script>
+<script src="app.js"></script>
+
+</body></html>
